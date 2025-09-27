@@ -27,41 +27,41 @@ type numberTest struct {
 
 var numberTests = []numberTest{
 	// basics
-	{"0", true, true, true, false, 0, 0, 0, 0},
-	{"-0", true, true, true, false, 0, 0, 0, 0}, // check that -0 is a uint.
-	{"73", true, true, true, false, 73, 73, 73, 0},
-	{"7_3", true, true, true, false, 73, 73, 73, 0},
-	{"0b10_010_01", true, true, true, false, 73, 73, 73, 0},
-	{"0B10_010_01", true, true, true, false, 73, 73, 73, 0},
-	{"073", true, true, true, false, 073, 073, 073, 0},
-	{"0o73", true, true, true, false, 073, 073, 073, 0},
-	{"0O73", true, true, true, false, 073, 073, 073, 0},
-	{"0x73", true, true, true, false, 0x73, 0x73, 0x73, 0},
-	{"0X73", true, true, true, false, 0x73, 0x73, 0x73, 0},
-	{"0x7_3", true, true, true, false, 0x73, 0x73, 0x73, 0},
-	{"-73", true, false, true, false, -73, 0, -73, 0},
-	{"+73", true, false, true, false, 73, 0, 73, 0},
-	{"100", true, true, true, false, 100, 100, 100, 0},
-	{"1e9", true, true, true, false, 1e9, 1e9, 1e9, 0},
-	{"-1e9", true, false, true, false, -1e9, 0, -1e9, 0},
-	{"-1.2", false, false, true, false, 0, 0, -1.2, 0},
-	{"1e19", false, true, true, false, 0, 1e19, 1e19, 0},
-	{"1e1_9", false, true, true, false, 0, 1e19, 1e19, 0},
-	{"1E19", false, true, true, false, 0, 1e19, 1e19, 0},
-	{"-1e19", false, false, true, false, 0, 0, -1e19, 0},
-	{"0x_1p4", true, true, true, false, 16, 16, 16, 0},
-	{"0X_1P4", true, true, true, false, 16, 16, 16, 0},
-	{"0x_1p-4", false, false, true, false, 0, 0, 1 / 16., 0},
+	{"0", true, true, true, true, 0, 0, 0, 0 + 0i},
+	{"-0", true, true, true, true, 0, 0, 0, 0 + 0i}, // check that -0 is a uint.
+	{"73", true, true, true, true, 73, 73, 73, 73 + 0i},
+	{"7_3", true, true, true, true, 73, 73, 73, 73 + 0i},
+	{"0b10_010_01", true, true, true, true, 73, 73, 73, 73 + 0i},
+	{"0B10_010_01", true, true, true, true, 73, 73, 73, 73 + 0i},
+	{"073", true, true, true, true, 073, 073, 073, 73 + 0i},
+	{"0o73", true, true, true, true, 073, 073, 073, 73 + 0i},
+	{"0O73", true, true, true, true, 073, 073, 073, 73 + 0i},
+	{"0x73", true, true, true, true, 0x73, 0x73, 0x73, 73 + 0i},
+	{"0X73", true, true, true, true, 0x73, 0x73, 0x73, 73 + 0i},
+	{"0x7_3", true, true, true, true, 0x73, 0x73, 0x73, 73 + 0i},
+	{"-73", true, false, true, true, -73, 0, -73, -73 + 0i},
+	{"+73", true, false, true, true, 73, 0, 73, +73 + 0i},
+	{"100", true, true, true, true, 100, 100, 100, 100 + 0i},
+	{"1e9", true, true, true, true, 1e9, 1e9, 1e9, 1e9 + 0i},
+	{"-1e9", true, false, true, true, -1e9, 0, -1e9, -1e9 + 0i},
+	{"-1.2", false, false, true, true, 0, 0, -1.2, -1.2 + 0i},
+	{"1e19", false, true, true, true, 0, 1e19, 1e19, 1e19 + 0i},
+	{"1e1_9", false, true, true, true, 0, 1e19, 1e19, 1e19 + 0i},
+	{"1E19", false, true, true, true, 0, 1e19, 1e19, 1e19 + 0i},
+	{"-1e19", false, false, true, true, 0, 0, -1e19, -1e19 + 0i},
+	{"0x_1p4", true, true, true, true, 16, 16, 16, 16 + 0i},
+	{"0X_1P4", true, true, true, true, 16, 16, 16, 16 + 0i},
+	{"0x_1p-4", false, false, true, true, 0, 0, 1 / 16., 0.0625 + 0i},
 	{"4i", false, false, false, true, 0, 0, 0, 4i},
 	{"-1.2+4.2i", false, false, false, true, 0, 0, 0, -1.2 + 4.2i},
-	{"073i", false, false, false, true, 0, 0, 0, 73i}, // not octal!
+	{"073i", false, false, false, true, 0, 0, 0, 0 + 73i}, // not octal!
 	// complex with 0 imaginary are float (and maybe integer)
-	{"0i", true, true, true, true, 0, 0, 0, 0},
-	{"-1.2+0i", false, false, true, true, 0, 0, -1.2, -1.2},
-	{"-12+0i", true, false, true, true, -12, 0, -12, -12},
-	{"13+0i", true, true, true, true, 13, 13, 13, 13},
+	{"0i", true, true, true, true, 0, 0, 0, 0 + 0i},
+	{"-1.2+0i", false, false, true, true, 0, 0, -1.2, -1.2 + 0i},
+	{"-12+0i", true, false, true, true, -12, 0, -12, -12 + 0i},
+	{"13+0i", true, true, true, true, 13, 13, 13, 13 + 0i},
 	// funny bases
-	{"0123", true, true, true, false, 0123, 0123, 0123, 0},
+	{"0123", true, true, true, true, 0123, 0123, 0123, 123 + 0i},
 	{"-0x0", true, true, true, false, 0, 0, 0, 0},
 	{"0xdeadbeef", true, true, true, false, 0xdeadbeef, 0xdeadbeef, 0xdeadbeef, 0},
 	// character constants
@@ -130,6 +130,9 @@ func TestNumberParse(t *testing.T) {
 				t.Errorf("expected integer for %q", test.text)
 			}
 			if n.Int64 != test.int64 {
+				fmt.Println("111 ", test)
+				fmt.Println("aaaa ", typ, test.text)
+
 				t.Errorf("int64 for %q should be %d Is %d", test.text, test.int64, n.Int64)
 			}
 		} else if n.IsInt {

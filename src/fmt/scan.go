@@ -462,7 +462,6 @@ func (s *ss) token(skipSpace bool, f func(rune) bool) []byte {
 	return s.buf
 }
 
-var errComplex = errors.New("syntax error scanning complex number")
 var errBool = errors.New("syntax error scanning boolean")
 
 func indexRune(s string, r rune) int {
@@ -737,28 +736,94 @@ func (s *ss) floatToken() string {
 	return string(s.buf)
 }
 
-// complexTokens returns the real and imaginary parts of the complex number starting here.
-// The number might be parenthesized and has the format (N+Ni) where N is a floating-point
-// number and there are no spaces within.
+// parseComplexTerm parses one term of a complex number.
+// parseComplexTerm Returns real/imag parts as strings, plus flags for type and success.
+func (s *ss) parseComplexTerm() (real, imag string, isImag bool, ok bool) {
+	s.buf = s.buf[:0] // Clear buffer for sign
+
+	sign := ""
+	if s.accept("+-") {
+		sign = string(s.buf)
+		if s.peek("+-") {
+			s.errorString("invalid complex term: consecutive signs")
+			return "", "", false, false
+		}
+	}
+
+	val := ""
+	if !s.peek("i") {
+		val = s.floatToken()
+	}
+
+	isImag = s.accept("i")
+
+	if val == "" {
+		if isImag {
+			val = "1" // Bare 'i' or '-i' becomes '1' or '-1'
+		} else {
+			s.errorString("invalid complex term: expected number or 'i'")
+			return "", "", false, false
+		}
+	}
+
+	signedVal := sign + val
+
+	if isImag {
+		return "0", signedVal, true, true
+	}
+
+	return signedVal, "0", false, true
+}
+
+// complexTokens returns the real and imaginary parts of a complex number.
+// Supported formats (with optional surrounding parentheses):
+//
+//	±N        : real only
+//	±Ni       : imaginary only
+//	±i        : implicit 1i or -1i
+//	N±Ni      : real then imaginary
+//	Ni±N      : imaginary then real
+//
+// N is any valid floating-point literal (decimal, float, or hex-float).
 func (s *ss) complexTokens() (real, imag string) {
-	// TODO: accept N and Ni independently?
 	parens := s.accept("(")
-	real = s.floatToken()
-	s.buf = s.buf[:0]
-	// Must now have a sign.
-	if !s.accept("+-") {
-		s.error(errComplex)
+	if parens {
+		if s.peek(")") {
+			s.errorString("invalid complex number: empty parentheses")
+			return "", ""
+		}
 	}
-	// Sign is now in buffer
-	imagSign := string(s.buf)
-	imag = s.floatToken()
-	if !s.accept("i") {
-		s.error(errComplex)
+
+	r, i, isImag, ok := s.parseComplexTerm()
+	if !ok {
+		return "", ""
 	}
-	if parens && !s.accept(")") {
-		s.error(errComplex)
+	real, imag = r, i
+
+	if s.peek("+-") {
+		r2, i2, isImag2, ok2 := s.parseComplexTerm()
+		if !ok2 {
+			return "", ""
+		}
+		if isImag == isImag2 {
+			s.errorString("invalid complex number: expected one real and one imaginary term")
+			return "", ""
+		}
+		if isImag2 {
+			imag = i2
+		} else {
+			real = r2
+		}
 	}
-	return real, imagSign + imag
+
+	if parens {
+		if !s.accept(")") {
+			s.errorString("invalid complex number: missing closing parenthesis")
+			return "", ""
+		}
+	}
+
+	return real, imag
 }
 
 func hasX(s string) bool {
